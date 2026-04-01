@@ -251,33 +251,75 @@ function handleCsvUpload(event) {
 }
 
 function parseCSV(text) {
-  const lines = text.split(/\r\n|\n/).filter((line) => line.trim() !== "");
-  if (lines.length < 2) {
+  // Handle UTF-8 BOM if present
+  if (text.startsWith("\uFEFF")) {
+    text = text.substring(1);
+  }
+
+  const rows = [];
+  let currentRow = [];
+  let currentField = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const nextChar = text[i + 1];
+
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        // Escaped double quote ("")
+        currentField += '"';
+        i++; // Skip next quote
+      } else {
+        // Switch quote state
+        inQuotes = !inQuotes;
+      }
+    } else if (char === "," && !inQuotes) {
+      // End of field
+      currentRow.push(currentField);
+      currentField = "";
+    } else if ((char === "\r" || char === "\n") && !inQuotes) {
+      // End of row
+      currentRow.push(currentField);
+      if (currentRow.length > 0 && currentRow.some((f) => f.trim() !== "")) {
+        rows.push(currentRow);
+      }
+      currentRow = [];
+      currentField = "";
+      // Handle CRLF
+      if (char === "\r" && nextChar === "\n") {
+        i++;
+      }
+    } else {
+      currentField += char;
+    }
+  }
+
+  // Handle last line if file doesn't end with newline
+  if (currentField !== "" || currentRow.length > 0) {
+    currentRow.push(currentField);
+    if (currentRow.some((f) => f.trim() !== "")) {
+      rows.push(currentRow);
+    }
+  }
+
+  if (rows.length < 2) {
     throw new Error("CSV must have at least 1 data row");
   }
 
-  const headers = parseCSVLine(lines[0]);
-  AppState.csvHeaders = headers.map((h) => h.replace(/^"|"$/g, "").trim());
+  // Headers are the first valid row
+  const headers = rows[0].map((h) => h.trim());
+  AppState.csvHeaders = headers;
 
   AppState.csvData = [];
-  for (let i = 1; i < lines.length; i++) {
-    if (lines[i].trim() === "") continue;
-
-    const values = parseCSVLine(lines[i]);
-
-    if (values.length !== AppState.csvHeaders.length) {
-      while (values.length < AppState.csvHeaders.length) {
-        values.push("");
-      }
-      if (values.length > AppState.csvHeaders.length) {
-        values.length = AppState.csvHeaders.length;
-      }
-    }
-
+  for (let i = 1; i < rows.length; i++) {
+    const values = rows[i];
     const row = {};
+
     AppState.csvHeaders.forEach((header, index) => {
-      const value = values[index] || "";
-      row[header] = value.replace(/^"|"$/g, "").trim();
+      // Ensure we have a value, even if row is shorter than header
+      const value = values[index] !== undefined ? values[index] : "";
+      row[header] = value.trim();
     });
 
     AppState.csvData.push(row);
@@ -286,24 +328,23 @@ function parseCSV(text) {
   AppState.stats.total = AppState.csvData.length;
 }
 
+/**
+ * Kept for backward compatibility but internal logic now uses the character-scanner in parseCSV 
+ * to handle multi-line fields correctly.
+ */
 function parseCSVLine(line) {
   const values = [];
   let current = "";
   let inQuotes = false;
-  let quoteChar = "";
 
   for (let i = 0; i < line.length; i++) {
     const char = line[i];
-
-    if ((char === '"' || char === "'") && !inQuotes) {
-      inQuotes = true;
-      quoteChar = char;
-    } else if (char === quoteChar && inQuotes) {
-      if (i + 1 < line.length && line[i + 1] === quoteChar) {
-        current += char;
+    if (char === '"') {
+      if (inQuotes && i + 1 < line.length && line[i + 1] === '"') {
+        current += '"';
         i++;
       } else {
-        inQuotes = false;
+        inQuotes = !inQuotes;
       }
     } else if (char === "," && !inQuotes) {
       values.push(current);
@@ -312,10 +353,10 @@ function parseCSVLine(line) {
       current += char;
     }
   }
-
   values.push(current);
   return values;
 }
+
 
 function showCSVPreview() {
   const container = document.getElementById("csvPreview");
