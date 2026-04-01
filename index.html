@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Moxo Bulk Flow Launcher</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="./iconmoxo.png" type="iconmoxo.png">
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <div class="header-text">
+        <img src="https://cdn.prod.website-files.com/612ecbcc615e87b0b9b38524/660b7a404557a808e9e9b78d_moxo-logo.svg" alt="Moxo Logo" class="moxo-logo">
+        <h2>Bulk Flow Launcher</h2>
+        <p>Launch multiple Moxo Flows with Ease</p>
+      </div>
+
+      <!-- Step Indicators -->
+      <div class="step-indicator">
+        <div class="step active" id="step1-indicator">
+          <div class="step-circle pulse-animation">1</div>
+          <div class="step-label">Webhook Setup</div>
+        </div>
+        <div class="step" id="step2-indicator">
+          <div class="step-circle">2</div>
+          <div class="step-label">Upload JSON</div>
+        </div>
+        <div class="step" id="step3-indicator">
+          <div class="step-circle">3</div>
+          <div class="step-label">Upload CSV</div>
+        </div>
+        <div class="step" id="step4-indicator">
+          <div class="step-circle">4</div>
+          <div class="step-label">Map Fields</div>
+        </div>
+        <div class="step" id="step5-indicator">
+          <div class="step-circle">5</div>
+          <div class="step-label">Review</div>
+        </div>
+        <div class="step" id="step6-indicator">
+          <div class="step-circle">6</div>
+          <div class="step-label">Launch</div>
+        </div>
+      </div>
+
+      <!-- Step 1: Webhook Setup -->
+      <div class="card" id="step1">
+        <div class="card-header">
+          <h5 class="mb-0">Step 1: Configure Webhook</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label fw-bold"
+              >Webhook URL <span class="required-field">*</span></label
+            >
+            <input
+              type="url"
+              class="form-control"
+              id="webhookUrl"
+              placeholder="https://your-domain.moxo.com/webhook/create"
+              required
+            />
+            <small class="text-muted"
+              >URL to start Moxo Flows via webhook</small
+            >
+          </div>
+
+          <div class="d-flex justify-content-between mt-4">
+            <button class="btn btn-outline-secondary" disabled>Back</button>
+            <button class="btn btn-primary" onclick="validateStep1()">
+              Next <i class="fas fa-arrow-right ms-2"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: JSON Template Upload -->
+      <div class="card" id="step2" style="display: none">
+        <div class="card-header">
+          <h5 class="mb-0">Step 2: Upload JSON Template</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-4">
+            <div
+              class="upload-area"
+              id="jsonUploadArea"
+              onclick="document.getElementById('jsonFile').click()"
+            >
+              <input
+                type="file"
+                id="jsonFile"
+              
+                accept=".json"
+                style="display: none"
+              />
+              <i class="fas fa-file-code fa-3x mb-3"></i>
+              <h5 class="fw-bold mb-2">Drop JSON Template Here</h5>
+              <p class="text-muted mb-3">or click to browse files</p>
+              <p class="small text-muted">
+                Upload the webhook payload JSON template
+              </p>
+            </div>
+
+            <div id="jsonPreview" class="mt-4" style="display: none">
+              <div
+                class="d-flex justify-content-between align-items-center mb-3"
+              >
+                <h6 class="fw-bold mb-0">JSON Template Preview</h6>
+                <span class="badge bg-success" id="jsonFieldCount"
+                  >0 fields</span
+                >
+              </div>
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <span id="jsonFieldsList">Fields will be listed here</span>
+              </div>
+            </div>
+
+            <!-- Sample CSV Download Button -->
+            <button
+              class="btn btn-outline-primary sample-csv-btn"
+              id="downloadSampleCsvBtn"
+              style="display: none"
+              onclick="downloadSampleCSV()"
+            >
+              <i class="fas fa-download me-2"></i>Download Sample CSV Template
+            </button>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <button class="btn btn-outline-secondary" onclick="goToStep(1)">
+              <i class="fas fa-arrow-left me-2"></i>Back
+            </button>
+            <button
+              class="btn btn-primary"
+              onclick="validateStep2()"
+              id="nextStep2"
+              disabled
+            >
+              Continue to CSV Upload
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: CSV Upload -->
+      <div class="card" id="step3" style="display: none">
+        <div class="card-header">
+          <h5 class="mb-0">Step 3: Upload CSV File</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-4">
+            <div
+              class="upload-area"
+              id="csvUploadArea"
+              onclick="document.getElementById('csvFile').click()"
+            >
+              <input
+                type="file"
+                id="csvFile"
+                accept=".csv"
+                style="display: none"
+              />
+              <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+              <h5 class="fw-bold mb-2">Drop CSV File Here</h5>
+              <p class="text-muted mb-3">or click to browse files</p>
+              <p class="small text-muted">
+                CSV should include headers in first row
+              </p>
+            </div>
+
+            <!-- Auto-Map Toggle -->
+            <div id="autoMapToggleContainer" class="mt-4" style="display: none">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="autoMapToggle" checked>
+                <label class="form-check-label" for="autoMapToggle">
+                  <strong>Enable Auto-Mapping</strong>
+                  <small class="text-muted d-block">Automatically map CSV columns to similar JSON fields (recommended for similar column names)</small>
+                </label>
+              </div>
+              <div class="alert alert-warning mt-2" id="autoMapWarning" style="display: none">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Auto-mapping will attempt to match fields with similar names. Always verify mappings before proceeding.
+              </div>
+            </div>
+
+            <div id="csvPreview" class="mt-4" style="display: none">
+              <div
+                class="d-flex justify-content-between align-items-center mb-3"
+              >
+                <h6 class="fw-bold mb-0">CSV Preview</h6>
+                <div>
+                  <span class="badge bg-primary me-2" id="csvRowCount"
+                    >0 rows</span
+                  >
+                  <span class="badge bg-success" id="csvColCount"
+                    >0 columns</span
+                  >
+                </div>
+              </div>
+              <div class="table-responsive csv-order-preserved">
+                <table
+                  class="table table-sm table-hover"
+                  id="previewTable"
+                ></table>
+              </div>
+            </div>
+          </div>
+
+         <div class="alert alert-info">
+  <i class="fas fa-info-circle me-2"></i>
+  CSV should include columns that match the JSON template fields. Only
+  workspace_name and workspace_owner are required.<br />
+  <i class="fas fa-calendar-alt me-2"></i>
+  For workspace_due_date, use <strong>MM/DD/YYYY</strong> format (e.g., 03/22/2026). 
+  The system will automatically convert it to timestamp (milliseconds).
+</div>
+
+          <div class="d-flex justify-content-between">
+            <button class="btn btn-outline-secondary" onclick="goToStep(2)">
+              <i class="fas fa-arrow-left me-2"></i>Back
+            </button>
+            <button
+              class="btn btn-primary"
+              onclick="validateStep3()"
+              id="nextStep3"
+            >
+              Continue to Mapping
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Field Mapping -->
+      <div class="card" id="step4" style="display: none">
+        <div class="card-header">
+          <h5 class="mb-0">Step 4: Map CSV Columns to JSON Fields</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-4">
+            <!-- Workspace Name Builder -->
+            <div
+              class="workspace-name-builder"
+              id="workspaceNameBuilder"
+              style="display: none"
+            >
+              <h6 class="fw-bold mb-3">
+                Workspace Name Builder <span class="required-field">*</span>
+              </h6>
+              <p class="text-muted mb-3">
+                Build your workspace name using CSV fields. Drag and drop fields
+                to reorder.
+              </p>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold">Available CSV Fields:</label>
+                <div id="availableFields" class="mb-3">
+                  <!-- Fields will be added here -->
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-bold"
+                  >Workspace Name Template:</label
+                >
+                <div
+                  id="workspaceTemplate"
+                  class="mb-3 p-3 bg-light rounded"
+                  style="min-height: 50px"
+                >
+                  <!-- Template will be built here -->
+                </div>
+                <div class="row">
+                  <div class="col-md-4">
+                    <label class="form-label">Separator:</label>
+                    <input
+                      type="text"
+                      class="form-control separator-input"
+                      id="nameSeparator"
+                      value=" - "
+                      maxlength="5"
+                    />
+                  </div>
+                  <div class="col-md-8">
+                    <label class="form-label">Preview (first row):</label>
+                    <div
+                      class="preview-workspace-name"
+                      id="workspaceNamePreview"
+                    >
+                      Preview will appear here
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Workspace name will be saved to the
+                <strong>workspace_name</strong> field automatically.
+              </div>
+            </div>
+
+            <!-- In the Step 4 card, update this section -->
+<p class="text-muted mb-3">
+  Map your CSV columns to Moxo Flow attributes. 
+  <strong>Only workspace_name and workspace_owner are required.</strong><br>
+  <em>Note: Empty CSV values will be skipped - fields won't be included in the webhook call.</em>
+</p>
+
+            <!-- Clear Mappings Button -->
+            <div class="d-flex justify-content-end mb-3">
+              <button class="btn btn-outline-warning btn-sm" onclick="clearAllMappings()">
+                <i class="fas fa-times-circle me-1"></i> Clear All Mappings
+              </button>
+            </div>
+
+            <!-- Required Fields -->
+            <h6 class="fw-bold mb-3">
+              Required Fields <span class="required-field">*</span>
+            </h6>
+            <div id="requiredMapping" class="mb-4">
+              <!-- Required fields will be populated here -->
+            </div>
+
+            <!-- Optional Fields -->
+            <h6 class="fw-bold mb-3">Optional Fields</h6>
+            <div id="optionalMapping" class="mb-4">
+              <!-- Optional fields will be populated here -->
+            </div>
+
+            <!-- Custom Fields -->
+            <div id="customFieldsSection" style="display: none">
+              <h6 class="fw-bold mb-3">Custom Attributes</h6>
+              <div id="customMapping" class="mb-4">
+                <!-- Custom fields will be populated here -->
+              </div>
+              <button
+                class="btn btn-sm btn-outline-primary mb-3"
+                onclick="addCustomField()"
+              >
+                <i class="fas fa-plus me-1"></i>Add Custom Attribute
+              </button>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <button class="btn btn-outline-secondary" onclick="goToStep(3)">
+              <i class="fas fa-arrow-left me-2"></i>Back
+            </button>
+            <button class="btn btn-primary" onclick="validateStep4()">
+              Continue to Review
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5: Review -->
+      <div class="card" id="step5" style="display: none">
+        <div class="card-header">
+          <h5 class="mb-0">Step 5: Review & Validate</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-4">
+            <h6 class="fw-bold mb-3">Webhook Configuration</h6>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <strong>URL:</strong> <span id="reviewWebhookUrl"></span>
+              </div>
+            </div>
+
+            <h6 class="fw-bold mb-3 mt-4">JSON Template</h6>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <strong>Fields:</strong> <span id="reviewJsonFields"></span>
+              </div>
+              <div class="col-md-6">
+                <strong>Required:</strong>
+                <span id="reviewRequiredFields"></span>
+              </div>
+            </div>
+
+            <h6 class="fw-bold mb-3 mt-4">CSV Data</h6>
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <strong>Rows:</strong> <span id="reviewRowCount"></span>
+              </div>
+              <div class="col-md-4">
+                <strong>Columns:</strong> <span id="reviewColCount"></span>
+              </div>
+              <div class="col-md-4">
+                <strong>Auto-Mapping:</strong> 
+                <span id="reviewAutoMapStatus">Disabled</span>
+              </div>
+            </div>
+
+            <h6 class="fw-bold mb-3 mt-4">Field Mappings</h6>
+            <div id="reviewMappings" class="mb-4">
+              <!-- Mappings will be shown here -->
+            </div>
+
+            <div
+              id="validationErrors"
+              class="alert alert-danger"
+              style="display: none"
+            >
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              <span id="errorMessage"></span>
+            </div>
+
+            <div
+              id="validationSuccess"
+              class="alert alert-success"
+              style="display: none"
+            >
+              <i class="fas fa-check-circle me-2"></i>
+              All validations passed! Ready to launch.
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <button class="btn btn-outline-secondary" onclick="goToStep(4)">
+              <i class="fas fa-arrow-left me-2"></i>Back to Mapping
+            </button>
+            <button
+              class="btn btn-primary"
+              onclick="validateAll()"
+              id="validateBtn"
+            >
+              <i class="fas fa-check me-2"></i>Validate & Continue
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 6: Launch -->
+    <div class="card" id="step6" style="display: none">
+  <div class="card-header">
+    <h5 class="mb-0">Step 6: Submit Flow Requests</h5>
+  </div>
+
+  <div class="card-body">
+
+    <!-- Sticky banner -->
+    <div id="submitBanner" class="alert alert-info d-none shadow-sm" role="alert"></div>
+
+    <div class="row">
+      <div class="col-md-8">
+        <div class="log-container" id="consoleOutput">
+          <div class="log-entry">
+            <span class="text-muted">Ready to submit requests...</span>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <button
+            class="btn btn-primary w-100 mb-2"
+            id="launchBtn"
+            onclick="startLaunch()"
+          >
+            <i class="fas fa-play me-2"></i>Start Submitting Requests
+          </button>
+
+          <button
+            class="btn btn-outline-danger w-100"
+            onclick="cancelLaunch()"
+            id="cancelBtn"
+            style="display: none"
+          >
+            <i class="fas fa-stop me-2"></i>Cancel
+          </button>
+        </div>
+
+        <!-- <div class="mt-2 text-muted small">
+          <i class="fas fa-info-circle me-1"></i>
+          Note: In <strong>no-cors</strong> mode we can confirm only that the request was <em>submitted</em>. Please verify creation in Moxo.
+        </div> -->
+      </div>
+
+     <div class="col-md-4" style="color: #000;">
+  <div class="card bg-light">
+    <div class="card-body2">
+      <h6 class="fw-bold mb-3">Progress</h6>
+
+      <div class="mb-3">
+        <div class="d-flex justify-content-between mb-1">
+          <small>Processing</small>
+          <small id="progressPercent">0%</small>
+        </div>
+        <div class="progress">
+          <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="row text-center">
+        <div class="col-4">
+          <div class="h4 mb-1" id="totalCount">0</div>
+          <small class="text-muted2">Total</small>
+        </div>
+
+        <div class="col-4">
+          <div class="h4 mb-1 text-success" id="successCount">0</div>  <!-- Changed from submittedCount -->
+          <small class="text-muted2">Success</small>  <!-- Changed from Submitted -->
+        </div>
+
+        <div class="col-4">
+          <div class="h4 mb-1 text-danger" id="errorCount">0</div>
+          <small class="text-muted2">Error</small>  <!-- Changed from Network -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ... rest of the code stays same ... -->
+</div>
+    </div>
+
+    <div class="d-flex justify-content-between mt-4">
+      <button class="btn btn-outline-secondary" onclick="goToStep(5)">
+        <i class="fas fa-arrow-left me-2"></i>Back to Review
+      </button>
+    </div>
+  </div>
+</div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

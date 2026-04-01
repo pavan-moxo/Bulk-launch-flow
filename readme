@@ -1,0 +1,146 @@
+# 📦 Moxo Bulk Flow Launcher
+
+## 🌟 Overview
+
+The **Moxo Bulk Flow Launcher** is a web-based tool that helps you create multiple Moxo Flows (workspaces) in bulk using CSV data. It eliminates the need to manually create each workspace one by one.
+
+### 🎯 Perfect For:
+- **Customer Onboarding**: Create workspaces for multiple new customers
+- **Project Kickoffs**: Launch multiple project workspaces simultaneously
+- **Team Setup**: Create workspaces for different teams or departments
+- **Client Management**: Bulk create client portals
+
+---
+
+## 📋 **Step-by-Step Process**
+
+### **Step 1: Webhook Setup**
+1. **Enter your Moxo Webhook URL**
+   - Get this from your Moxo administrator
+   - Format: `https://your-company.moxo.com/webhook/create`
+   - This is where the tool will send requests to create flows
+
+2. **No authentication needed**
+   - The tool works with Moxo's standard webhooks
+   - Just the URL is required
+
+### **Step 2: Upload JSON Template**
+1. **Get your JSON template from Moxo**
+   - Export an existing flow as JSON from Moxo dashboard
+   - Or use a webhook payload template
+
+2. **Upload the JSON file**
+   - Drag & drop or click to browse
+   - The system will extract all field names
+   - Shows preview of detected fields
+
+3. **Download Sample CSV (Optional but Recommended)**
+   - After JSON upload, click "Download Sample CSV Template"
+   - Get a pre-formatted CSV with all your JSON fields as headers
+   - Fill in your data using this template
+
+### **Step 3: Upload CSV File**
+1. **Prepare your CSV data**
+   - First row must contain headers (column names)
+   - Each row = one workspace/flow
+   - Required columns: `workspace_name` and `workspace_owner`
+
+2. **Upload your CSV**
+   - Drag & drop or click to browse
+   - Preview shows first 5 rows to verify data
+   - System checks row and column counts
+   - Auto-Mapping toggle becomes available after upload
+   - CSV Preview table displays detected headers and sample data
+
+3. **Auto-Mapping Toggle**
+   - Enable Auto-Mapping to automatically match CSV columns to similar JSON fields
+   - Recommended when column names are similar to JSON fields
+   - Disabling Auto-Mapping will clear previously applied automatic mappings
+   - Auto-mapping attempts to match fields with similar names
+   - Always verify mappings before proceeding
+
+### **Step 4: Map Fields (Most Important Step!)**
+1. **Understand the mapping concept**
+   - Map CSV columns → JSON fields
+   - Example: Map CSV "client_email" column to JSON "workspace_owner" field
+
+2. **Required Fields (Must Map These)**
+   - **`workspace_name`**: Name of the workspace
+     - Can be a single CSV column
+     - OR use Workspace Name Builder (combine multiple columns)
+   - **`workspace_owner`**: Email of workspace owner (validated)
+
+3. **Optional Fields (Map if needed)**
+   - Map any other fields from JSON to CSV columns
+   - Fields can be skipped if not needed
+
+4. **Workspace Name Builder (Recommended)**
+   - Build dynamic names like "Client Name - Project Type"
+   - Drag & drop CSV columns to build the name
+   - Set custom separator (default: " - ")
+   - See real-time preview
+
+5. **Auto-Mapping Feature**
+   - Workspace name will be saved to the workspace_name field automatically when using Workspace Name Builder.
+   - Only workspace_name and workspace_owner are required fields.
+   - Empty CSV values will be skipped — fields will not be included in the webhook request.
+   - Click "Clear All Mappings" to remove all current mappings
+   - Useful when re-uploading CSV or adjusting mapping from scratch
+
+### **Step 5: Review & Validate**
+1. **System checks everything**
+   - Verifies all required fields are mapped
+   - Validates email formats
+   - Shows preview of first row's data
+   - Highlights any errors
+
+2. **Fix any issues before proceeding**
+   - Missing mappings
+   - Invalid emails
+   - Empty required fields
+
+3. **Mapping Confirmation**
+   - If Auto-Mapping was used, the system will prompt you to confirm the mappings
+   - Review carefully before proceeding
+
+### **Step 6: Launch Flows**
+1. **Start the bulk creation**
+   - Click "Start Launching Flows"
+   - System processes rows one by one
+   - Shows real-time progress
+
+2. **Monitor progress**
+   - Progress bar shows completion percentage
+   - Console log shows each request
+   - Results table shows success/error status
+
+
+---
+
+## 📅 **Date Field Special Handling**
+
+### **For `workspace_due_date` field:**
+1. **Enter dates in any format** in your CSV:
+   - `dd/mm/yyyy` (Recommended)
+   - `dd-mm-yyyy`
+   - `yyyy/mm/dd`
+   - `yyyy-mm-dd`
+   - `mm/dd/yyyy`
+   - `December 31, 2023`
+   - `2023-12-31 14:30`
+
+2. **System automatically converts** to timestamp (milliseconds)
+   - Moxo requires dates as timestamps
+   - Tool handles the conversion automatically
+   - Empty dates are skipped
+
+---
+
+### **JSON Template Requirements:**
+```json
+{
+  "workspace_name": "string",
+  "workspace_owner": "email@example.com",
+  "workspace_due_date": 1672531200000,
+  "custom_field": "value"
+}
