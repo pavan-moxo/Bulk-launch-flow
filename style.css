@@ -1,4 +1,12 @@
 /* style.css - Moxo Brand Redesign */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('./fonts/inter-latin-variable.woff2') format('woff2');
+}
+
 :root {
   --primary: #2C2A28;
   --primary-hover: #1E1C1A;
